@@ -136,7 +136,13 @@ namespace Assimp.Unmanaged {
                 {
                     using (var stream = assembly.GetManifestResourceStream(string.Concat("Assimp.", libPath)))
                     using (var output = File.Create(extractPath))
-                        stream.CopyTo(output);
+                    {
+                        var buffer = new byte[stream.Length];
+                        var count = stream.Read(buffer, 0, (int)stream.Length);
+                        if (count != stream.Length)
+                            throw new Exception("Couldn't read Assimp library!");
+                        output.Write(buffer, 0, count);
+                    }
                 }
                 impl.LoadAssimpLibrary(extractPath);
             }
