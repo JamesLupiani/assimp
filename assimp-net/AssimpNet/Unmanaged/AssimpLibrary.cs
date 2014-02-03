@@ -125,6 +125,10 @@ namespace Assimp.Unmanaged {
 
             try
             {
+                // Normally, each project that uses assimp-net would have to include both native DLLs in their
+                // project files. This workaround embeds both of them as resources so you only have the single
+                // dependency on AssimpNet. To do this, we extract the native DLLs to the %TEMP% directory with
+                // a version in the name, then pass this new path to the normal loader.
                 var assembly = Assembly.GetExecutingAssembly();
                 var assemblyName = assembly.GetName();
                 var tempDir = Path.Combine(Path.GetTempPath(), string.Concat(assemblyName.Name, ".", assemblyName.Version));
@@ -132,16 +136,19 @@ namespace Assimp.Unmanaged {
                     Directory.CreateDirectory(tempDir);
 
                 var extractPath = Path.Combine(tempDir, libPath);
-                if (!File.Exists(extractPath))
+                var fileInfo = new FileInfo(extractPath);
+                using (var stream = assembly.GetManifestResourceStream(string.Concat("Assimp.", libPath)))
                 {
-                    using (var stream = assembly.GetManifestResourceStream(string.Concat("Assimp.", libPath)))
-                    using (var output = File.Create(extractPath))
+                    if (!fileInfo.Exists || fileInfo.Length != stream.Length)
                     {
-                        var buffer = new byte[stream.Length];
-                        var count = stream.Read(buffer, 0, (int)stream.Length);
-                        if (count != stream.Length)
-                            throw new Exception("Couldn't read Assimp library!");
-                        output.Write(buffer, 0, count);
+                        using (var output = File.Create(extractPath))
+                        {
+                            var buffer = new byte[stream.Length];
+                            var count = stream.Read(buffer, 0, (int)stream.Length);
+                            if (count != stream.Length)
+                                throw new Exception("Couldn't read Assimp library!");
+                            output.Write(buffer, 0, count);
+                        }
                     }
                 }
                 impl.LoadAssimpLibrary(extractPath);
