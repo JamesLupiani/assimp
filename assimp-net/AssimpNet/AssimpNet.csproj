@@ -118,12 +118,14 @@
     <Compile Include="VertexWeight.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\..\build\Assimp32.dll">
+    <EmbeddedResource Include="..\libs\Assimp\Assimp32.dll">
       <Link>Assimp32.dll</Link>
-    </Content>
-    <Content Include="..\..\build\Assimp64.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\libs\Assimp\Assimp64.dll">
       <Link>Assimp64.dll</Link>
-    </Content>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <Content Include="AssimpLicense.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
